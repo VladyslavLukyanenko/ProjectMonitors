@@ -1,0 +1,12 @@
+﻿version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      - ./data/dumps:/db_dumps
+    environment:
+      POSTGRES_USER: snkrs-monitors
+      POSTGRES_PASSWORD: snkrs-monitors
+      POSTGRES_DB: snkrs-monitors

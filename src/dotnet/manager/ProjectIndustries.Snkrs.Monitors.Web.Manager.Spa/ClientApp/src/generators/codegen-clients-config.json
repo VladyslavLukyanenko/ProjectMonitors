@@ -1,0 +1,8 @@
+{
+   "npmName": "snkrs-monitors-management-api.spa",
+   "ngVersion":"10",
+   "providedInRoot": true,
+   "fileNaming": "kebab-case",
+   "useSingleRequestParameter": false,
+   "modelFileSuffix": ".model"
+}

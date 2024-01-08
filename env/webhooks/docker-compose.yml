@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:12
+    volumes:
+      - ./data/psql/data:/var/lib/postgresql/data
+      - ./data/psql/dumps:/psql_dumps
+    environment:
+      POSTGRES_USER: webhook-manager
+      POSTGRES_PASSWORD: webhook-manager
+      POSTGRES_DB: webhook-manager
+    ports:
+      - 45432:5432
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    volumes:
+      #      - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json
+      #      - ./rabbitmq/etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./data/rabbitmq/data:/var/lib/rabbitmq/mnesia/rabbit@golang-rabbit
+      - ./data/rabbitmq/logs:/var/log/rabbitmq/log
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  webhooksmanager:
+    image: alantoo/webhooksmanager:1
+    environment:
+      CONNECTION_STRINGS_RABBITMQ: "amqp://guest:guest@rabbitmq:5672/"
+      CONNECTION_STRINGS_POSTGRESQL: "host=db port=5432 user=webhook-manager password=webhook-manager dbname=webhook-manager sslmode=disable"
+
+#  webhook_sender:
+#    image: alantoo/webhook_sender:1
+#    environment:
+#      CONNECTION_STRINGS_RABBITMQ: "amqp://guest:guest@34.122.82.133:5672/"
+
+#  test_publisher:
+#    image: alantoo/test_publisher:1
+#    environment:
+#      CONNECTION_STRINGS_RABBITMQ: "amqp://guest:guest@34.122.82.133:5672/"

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:12
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+      - ./db_dumps:/db_dumps
+    environment:
+      POSTGRES_USER: snkrs-monitors
+      POSTGRES_PASSWORD: snkrs-monitors
+      POSTGRES_DB: snkrs-monitors
+  webapi:
+    image: 350537189140.dkr.ecr.us-east-1.amazonaws.com/manager-api:manual-v1
+    restart: on-failure
+    environment:
+      EntityFramework:MigrateDatabaseOnStart: "true"
+      DataSource:PostgresConnectionString: "Server=db;Port=5432;Username=snkrs-monitors;Password=snkrs-monitors;Database=snkrs-monitors;"
+      GoogleComputeEngine:CredentialsPath: /app/application_default_credentials.json
+      ASPNETCORE_URLS: "http://*:80"
+      Kestrel:Certificates:Development:Password: 1234567890
+    ports:
+      - 5000:80
+    volumes:
+      - ./logs/api:/snkrs-api-logs
+      - ./NLog.config:/app/NLog.config
+      - ./application_default_credentials.json:/app/application_default_credentials.json
+      - ${HOME}/.microsoft/usersecrets/:/root/.microsoft/usersecrets
+      - ${HOME}/.aspnet/https:/root/.aspnet/https/
+      - ./sslsvalidation:/app/wwwroot/.well-known/pki-validation:ro
+    depends_on:
+      - db
+  webspa:
+    image: 350537189140.dkr.ecr.us-east-1.amazonaws.com/manager-spa:manual-v2
+    restart: on-failure
+    environment:
+      ASPNETCORE_URLS: "http://*:80"
+      Kestrel:Certificates:Development:Password: 1234567890
+    ports:
+      - 5001:80
+    volumes:
+      - ${HOME}/.microsoft/usersecrets/:/root/.microsoft/usersecrets
+      - ${HOME}/.aspnet/https:/root/.aspnet/https/
